@@ -7,6 +7,7 @@ use OAuth\Common\Exception\Exception;
 use OAuth\Common\Storage\TokenStorageInterface;
 use OAuth\ServiceFactory as BaseServiceFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ServiceFactory
 {
@@ -42,36 +43,30 @@ class ServiceFactory
     }
 
     /**
-     * @param $resourceOwnerName
+     * @param string $name
+     * @param string $client
+     * @param string $secret
+     * @param array $scopes
+     * @param array|string $url
      * @return \OAuth\Common\Service\ServiceInterface
      * @throws Exception
      */
-    public function createService($resourceOwnerName)
+    public function createService($name, $client, $secret, $url = null, array $scopes = [])
     {
-        if (!isset(ResourceOwners::$all[$resourceOwnerName])) {
-            throw new Exception('Resource owner ' . $resourceOwnerName . ' is not available');
+        if (!isset(ResourceOwners::$all[$name])) {
+            throw new Exception('Resource owner ' . $name . ' is not available');
         }
 
-        if (isset($this->serviceCache[$resourceOwnerName])) {
-            return $this->serviceCache[$resourceOwnerName];
+        if (isset($this->serviceCache[$name])) {
+            return $this->serviceCache[$name];
         }
 
-        $lowerResourceOwnerName = $string = strtolower(preg_replace('/(?<=\\w)(?=[A-Z])/',"_$1", $resourceOwnerName));
-        $paramName = 'apinnecke_oauth.resource_owners.' . $lowerResourceOwnerName . '.callback_url';
-        if (!$this->container->hasParameter($paramName)
-            || !($callbackUrl = $this->container->getParameter($paramName))
-            || null === $callbackUrl
-        ) {
-            $callbackUrl = $this->container->get('router')->getContext()->getBaseUrl();
+        if (is_array($url)) {
+            $url = $this->container->get('router')->generate($url[0], $url[1], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
-        $credentials = new Credentials(
-            $this->container->getParameter('apinnecke_oauth.resource_owners.' . $lowerResourceOwnerName . '.client_id'),
-            $this->container->getParameter('apinnecke_oauth.resource_owners.' . $lowerResourceOwnerName . '.client_secret'),
-            $callbackUrl
-        );
+        $credentials = new Credentials($client, $secret, $url);
 
-        return $this->serviceCache[$resourceOwnerName] = $this->factory->createService($resourceOwnerName, $credentials, $this->storage);
+        return $this->serviceCache[$name] = $this->factory->createService($name, $credentials, $this->storage, $scopes);
     }
 }
- 

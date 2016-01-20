@@ -30,7 +30,7 @@ final class ResourceOwners
     const HEROKU = 'Heroku';
     const INSTAGRAM = 'Instagram';
     const JAWBONE_UP = 'JawboneUP';
-    const LINKED_IN = 'LinkedIn';
+    const LINKED_IN = 'Linkedin';
     const MAILCHIMP = 'Mailchimp';
     const MICROSOFT = 'Microsoft';
     const PAYPAL = 'Paypal';
@@ -129,4 +129,3 @@ final class ResourceOwners
         self::YAMMER => self::YAMMER,
     );
 }
- 

@@ -26,6 +26,7 @@ class APinneckeOAuthExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $resourceOwners = array();
+
         foreach ($config['resource_owners'] as $name => $options) {
             $resourceOwners[] = $name;
             $lowerName = strtolower($name);
@@ -34,6 +35,10 @@ class APinneckeOAuthExtension extends Extension
             $definition->setFactory(array(new Reference('apinnecke_oauth.service_factory'), 'createService'));
             $definition->setClass('%apinnecke_oauth.service.' . $lowerName . '.class%');
             $definition->addArgument($name);
+            $definition->addArgument($options['client_id']);
+            $definition->addArgument($options['client_secret']);
+            $definition->addArgument($options['callback_url']);
+            $definition->addArgument($options['scopes']);
 
             $container->setDefinition('apinnecke_oauth.service.' . $lowerName, $definition);
 
